@@ -1,0 +1,86 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  timezone     String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  trackedProblems TrackedProblem[]
+
+  @@map("users")
+}
+
+model Problem {
+  id         Int        @id
+  title      String
+  slug       String
+  difficulty Difficulty
+  tags       String[]
+  url        String
+
+  trackedProblems TrackedProblem[]
+
+  @@map("problems")
+}
+
+model TrackedProblem {
+  id              String        @id @default(uuid())
+  userId          String        @map("user_id")
+  problemId       Int           @map("problem_id")
+  initialSolvedAt DateTime      @map("initial_solved_at") @db.Date
+  currentStage    Int           @default(0) @map("current_stage")
+  nextDueDate     DateTime?     @map("next_due_date") @db.Date
+  status          TrackStatus   @default(ACTIVE)
+  resetCount      Int           @default(0) @map("reset_count")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  user    User     @relation(fields: [userId], references: [id])
+  problem Problem  @relation(fields: [problemId], references: [id])
+  attempts Attempt[]
+
+  @@unique([userId, problemId])
+  @@index([userId, status, nextDueDate])
+  @@map("tracked_problems")
+}
+
+model Attempt {
+  id               String      @id @default(uuid())
+  trackedProblemId String      @map("tracked_problem_id")
+  stage            Int
+  attemptedAt      DateTime    @map("attempted_at") @db.Date
+  outcome          Outcome
+  failureNote      String?     @map("failure_note")
+  createdAt        DateTime    @default(now()) @map("created_at")
+
+  trackedProblem TrackedProblem @relation(fields: [trackedProblemId], references: [id])
+
+  @@map("attempts")
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum TrackStatus {
+  ACTIVE
+  MASTERED
+}
+
+enum Outcome {
+  PASS
+  FAIL
+}
