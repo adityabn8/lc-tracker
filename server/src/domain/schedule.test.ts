@@ -182,7 +182,8 @@ describe("computeNextDue", () => {
   it("stage 1 = +3 days", () => expect(computeNextDue(1, "2024-01-01")).toBe("2024-01-04"));
   it("stage 2 = +10 days", () => expect(computeNextDue(2, "2024-01-01")).toBe("2024-01-11"));
   it("stage 3 = +30 days", () => expect(computeNextDue(3, "2024-01-01")).toBe("2024-01-31"));
-  it("stage 4 = +90 days", () => expect(computeNextDue(4, "2024-01-01")).toBe("2024-04-01"));
+  // 2024 is a leap year: Jan(30 remaining) + Feb(29) + Mar(31) = Mar 31
+  it("stage 4 = +90 days", () => expect(computeNextDue(4, "2024-01-01")).toBe("2024-03-31"));
 });
 
 // ---------------------------------------------------------------------------
@@ -193,6 +194,6 @@ describe("addDays", () => {
     expect(addDays("2024-01-31", 30)).toBe("2024-03-01");
   });
   it("adds exactly 90 days (not 3 calendar months)", () => {
-    expect(addDays("2024-01-01", 90)).toBe("2024-04-01");
+    expect(addDays("2024-01-01", 90)).toBe("2024-03-31");
   });
 });
