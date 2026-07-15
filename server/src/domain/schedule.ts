@@ -9,13 +9,17 @@ export interface TrackedProblemState {
   resetCount: number;
 }
 
-// Days to add after a successful pass at each stage (indexed 1–4)
+// Days to add after a successful pass at each stage (indexed 1–5).
+// Each entry is the gap between the previous pass and that stage's review.
 const STAGE_INTERVALS: Record<number, number> = {
   1: 3,
   2: 10,
   3: 30,
   4: 90,
+  5: 90,
 };
+
+export const MAX_STAGE = 5;
 
 export function addDays(isoDate: string, days: number): string {
   return DateTime.fromISO(isoDate).plus({ days }).toISODate()!;
@@ -50,15 +54,15 @@ export function applyPass(
 ): TrackedProblemState {
   const attemptStage = state.currentStage + 1;
 
-  if (attemptStage > 4) {
+  if (attemptStage > MAX_STAGE || state.status === "MASTERED") {
     // Already mastered — idempotent no-op
     return state;
   }
 
-  if (attemptStage === 4) {
+  if (attemptStage === MAX_STAGE) {
     return {
       ...state,
-      currentStage: 4,
+      currentStage: MAX_STAGE,
       nextDueDate: null,
       status: "MASTERED",
     };

@@ -14,12 +14,12 @@ export function StageIndicator({ stage, status }: Props) {
     );
   }
 
-  const nextStage = Math.min(stage + 1, 4);
+  const nextStage = Math.min(stage + 1, 5);
 
   return (
     <span className="inline-flex items-center gap-2.5">
       <span className="inline-flex items-center gap-1">
-        {[1, 2, 3, 4].map((s) => (
+        {[1, 2, 3, 4, 5].map((s) => (
           <span
             key={s}
             className={cn(

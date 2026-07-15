@@ -110,7 +110,7 @@ export function ProblemDetailPage() {
           <div>
             <p className="text-xs text-muted-foreground">Stage</p>
             <p className="font-semibold text-sm mt-0.5">
-              {item.status === "MASTERED" ? "4/4" : `${item.currentStage}/4`}
+              {item.status === "MASTERED" ? "5/5" : `${item.currentStage}/5`}
             </p>
           </div>
           <div>

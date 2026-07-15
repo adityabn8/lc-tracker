@@ -9,7 +9,7 @@ import {
 } from "./schedule";
 
 // ---------------------------------------------------------------------------
-// Happy path: add → pass S1 → pass S2 → pass S3 → pass S4 → MASTERED
+// Happy path: add → pass S1 → S2 → S3 → S4 → pass S5 → MASTERED
 // ---------------------------------------------------------------------------
 describe("full happy path", () => {
   const initialDate = "2024-01-01";
@@ -52,7 +52,7 @@ describe("full happy path", () => {
     expect(state.status).toBe("ACTIVE");
   });
 
-  it("pass stage 4: status becomes MASTERED, nextDueDate is null", () => {
+  it("pass stage 4: advances to stage 4, stage 5 due +90d", () => {
     let state = computeInitialState(initialDate);
     state = applyPass(state, "2024-01-04");
     state = applyPass(state, "2024-01-14");
@@ -60,6 +60,18 @@ describe("full happy path", () => {
     const passDate = "2024-05-13";
     state = applyPass(state, passDate);
     expect(state.currentStage).toBe(4);
+    expect(state.nextDueDate).toBe("2024-08-11"); // +90d
+    expect(state.status).toBe("ACTIVE");
+  });
+
+  it("pass stage 5: status becomes MASTERED, nextDueDate is null", () => {
+    let state = computeInitialState(initialDate);
+    state = applyPass(state, "2024-01-04");
+    state = applyPass(state, "2024-01-14");
+    state = applyPass(state, "2024-02-13");
+    state = applyPass(state, "2024-05-13");
+    state = applyPass(state, "2024-08-11");
+    expect(state.currentStage).toBe(5);
     expect(state.nextDueDate).toBeNull();
     expect(state.status).toBe("MASTERED");
   });
@@ -168,10 +180,22 @@ describe("idempotency", () => {
     state = applyPass(state, "2024-01-04");
     state = applyPass(state, "2024-01-14");
     state = applyPass(state, "2024-02-13");
-    state = applyPass(state, "2024-05-13"); // MASTERED
+    state = applyPass(state, "2024-05-13");
+    state = applyPass(state, "2024-08-11"); // MASTERED
     const before = { ...state };
-    state = applyPass(state, "2024-06-01"); // replay
+    state = applyPass(state, "2024-09-01"); // replay
     expect(state).toEqual(before);
+  });
+
+  it("applyPass on a legacy stage-4 MASTERED problem is a no-op", () => {
+    // Problems mastered before stage 5 existed have currentStage 4 + MASTERED
+    const legacy = {
+      currentStage: 4,
+      nextDueDate: null,
+      status: "MASTERED" as const,
+      resetCount: 0,
+    };
+    expect(applyPass(legacy, "2024-09-01")).toEqual(legacy);
   });
 });
 
@@ -184,6 +208,7 @@ describe("computeNextDue", () => {
   it("stage 3 = +30 days", () => expect(computeNextDue(3, "2024-01-01")).toBe("2024-01-31"));
   // 2024 is a leap year: Jan(30 remaining) + Feb(29) + Mar(31) = Mar 31
   it("stage 4 = +90 days", () => expect(computeNextDue(4, "2024-01-01")).toBe("2024-03-31"));
+  it("stage 5 = +90 days", () => expect(computeNextDue(5, "2024-01-01")).toBe("2024-03-31"));
 });
 
 // ---------------------------------------------------------------------------

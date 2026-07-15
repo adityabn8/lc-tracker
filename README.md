@@ -86,6 +86,7 @@ Tests cover the domain scheduling module exhaustively (schedule.test.ts).
 | 2     | +10 days from S1 pass |
 | 3     | +30 days from S2 pass |
 | 4     | +90 days from S3 pass |
+| 5     | +90 days from S4 pass |
 
 FAIL at any stage → reset to Stage 0, due in 3 days. History preserved.
-PASS Stage 4 → MASTERED, removed from scheduling.
+PASS Stage 5 → MASTERED, removed from scheduling.
