@@ -65,7 +65,7 @@ model Attempt {
   failureNote      String?     @map("failure_note")
   createdAt        DateTime    @default(now()) @map("created_at")
 
-  trackedProblem TrackedProblem @relation(fields: [trackedProblemId], references: [id])
+  trackedProblem TrackedProblem @relation(fields: [trackedProblemId], references: [id], onDelete: Cascade)
 
   @@map("attempts")
 }
